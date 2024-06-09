@@ -1,15 +1,4 @@
-replicaCount: 1
-
 image:
-  repository: "temi111/your-flask-app"
+  repository: sample-app
+  tag: latest
   pullPolicy: IfNotPresent
-  tag: "latest"
-
-service:
-  type: NodePort
-  port: 80
-
-ingress:
-  enabled: false
-
-resources: {}

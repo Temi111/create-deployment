@@ -1,33 +1,22 @@
 #!/bin/bash
 
 # Variables
-NAMESPACE= "test"
-RELEASE_NAME="temitope"
-HELM_CHART_PATH= "helm"
-DOCKER_REPO= "temi111/your-flask-app"
-DOCKER_TAG= latest
+BRANCH_NAME=$1
+NAMESPACE=${BRANCH_NAME//\//-}  # Replace '/' with '-' to make it a valid namespace name
+HELM_RELEASE_NAME=$NAMESPACE
+CHART_PATH="./sample-app"  # Ensure this path points to the directory containing your Chart.yaml
+INGRESS_TEMPLATE_PATH="./ingress-template.yaml"  # Ensure this path points to your ingress template
 
-# Check if all arguments are provided
-if [ "$#" -ne 5 ]; then
-  echo "Usage: $0 <namespace> <release_name> <helm_chart_path> <docker_repo> <docker_tag>"
-  exit 1
-fi
-
-# Create a new namespace
-echo "Creating namespace $NAMESPACE..."
+# Create Namespace
 kubectl create namespace $NAMESPACE
 
-# Update the image repository and tag in the values.yaml file
-sed -i "s|repository: .*|repository: \"$DOCKER_REPO\"|g" $HELM_CHART_PATH/values.yaml
-sed -i "s|tag: .*|tag: \"$DOCKER_TAG\"|g" $HELM_CHART_PATH/values.yaml
+# Deploy Application using Helm
+helm install $HELM_RELEASE_NAME $CHART_PATH --namespace $NAMESPACE
 
-# Deploy the Helm chart to the new namespace
-echo "Deploying Helm chart to namespace $NAMESPACE..."
-helm install $RELEASE_NAME $HELM_CHART_PATH --namespace $NAMESPACE
+# Apply Ingress Configuration
+INGRESS_FILE="./generated-ingress.yaml"
+cp $INGRESS_TEMPLATE_PATH $INGRESS_FILE
+sed -i "s/{{NAMESPACE}}/$NAMESPACE/g" $INGRESS_FILE
+kubectl apply -f $INGRESS_FILE --namespace $NAMESPACE
 
-# Check the deployment status
-if [ $? -eq 0 ]; then
-  echo "Deployment successful!"
-else
-  echo "Deployment failed!"
-fi
+echo "Deployment completed for branch: $BRANCH_NAME"
