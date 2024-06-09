@@ -4,7 +4,7 @@
 BRANCH_NAME=$1
 NAMESPACE=${BRANCH_NAME//\//-}  # Replace '/' with '-' to make it a valid namespace name
 HELM_RELEASE_NAME=$NAMESPACE
-CHART_PATH="./sample-app"  # Ensure this path points to the directory containing your Chart.yaml
+CHART_PATH="./helm"  # Ensure this path points to the directory containing your Chart.yaml
 INGRESS_TEMPLATE_PATH="./ingress-template.yaml"  # Ensure this path points to your ingress template
 
 # Create Namespace
